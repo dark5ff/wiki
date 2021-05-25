@@ -34,9 +34,9 @@ http://localhost/w/mw-config/index.php
 Follow instructions refer to this link: \
 https://wnw1005.tistory.com/570 \
 https://wnw1005.tistory.com/571
-
-</hr>
-
+\
+\
+\
 # wiki_insert.py
 ## 1. Usage
 ```

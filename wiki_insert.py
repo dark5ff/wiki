@@ -1,4 +1,4 @@
-# Developed in Python 3.8.5 by nowiz (giwon9977@naver.com)
+# Developed in Python 3.8.5 by Nowiz (giwon9977@naver.com)
 import pymysql
 import random
 from datetime import datetime

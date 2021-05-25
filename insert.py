@@ -2,6 +2,7 @@ import pymysql
 import random
 from datetime import datetime
 import hashlib
+import requests
 
 ### Function Defintion
 def base36encode(number, alphabet='0123456789abcdefghijklmnopqrstuvwxyz'):
@@ -29,7 +30,7 @@ def base36encode(number, alphabet='0123456789abcdefghijklmnopqrstuvwxyz'):
 ### MAIN start
 db = pymysql.connect(
         user='wikiuser',
-        passwd='pass@word',
+        passwd='nowiz',
         host='localhost',
         db='wikidb',
         charset='utf8'
@@ -54,18 +55,20 @@ try:
             page_latest = value
 
     print("[+] SELECT QUERY OK")
-except:
+except Exception as e:
     print("[+] Error: unable to select data")
+    print(e)
 
 # TIMESTAMP
 timestamp = datetime.now().strftime('%Y%m%d%H%M%S').encode()
 
 # PAGE TITLE
-title = 'nowiz'.capitalize()
+title = 'html'.capitalize()
+title = title.replace(' ', '_')     # Blank in the title replaced with '_'
 title = title.encode()
 
 # PAGE CONTENT -> SHA1 -> BASE36 encode
-plain_text = "nowiz"    # 평문
+plain_text = "<h1> hello world! </h1>"    # 평문
 print("Plain text: {}".format(plain_text))
 
 h = hashlib.sha1()
@@ -83,6 +86,7 @@ old_text            = plain_text.encode()
 old_flags           = b'utf-8'
 
 # page table values
+# page_id           = auto_increment
 page_namespace      = 0
 page_title          = title
 page_is_redirect    = 0
@@ -95,6 +99,7 @@ page_len            = len(old_text)
 page_content_model  = b'wikitext'
 
 # revision table values
+# rev_id            = auto_increment
 rev_page            = page_latest
 rev_comment_id      = 0
 rev_actor           = 0
@@ -106,10 +111,31 @@ rev_parent_id       = 0
 rev_sha1            = base36
 
 # content table values
+# content_id        = auto_increment
 content_size        = len(old_text)
 content_sha1        = base36
 content_model       = 1
 content_address     = 'tt:{}'.format(page_latest).encode()    # tt:<id> where <id> is old_id -> rev_id -> page_latest
+
+# slots table values
+slot_revision_id    = page_latest       # Originally, rev_id is the right value to slot_revision_id
+slot_role_id        = 1                 # role:1 -> main
+slot_content_id     = page_latest       # Originally, content_id is the right value to slot_content_id
+slot_origin         = page_latest       # Originally, rev_id is the right value to slot_origin
+
+# comment table values
+comment_hash        = 0                 # type:int
+comment_text        = ''.encode()       # type:blob
+
+# revision_comment_temp table values
+revcomment_rev          = page_latest   # type:int
+revcomment_comment_id   = page_latest   # type:bigint
+
+# revision_actor_temp table values
+revactor_rev        = page_latest       # type:int
+revactor_actor      = 1                 # type:bigint / 1:Wikiadmin, 2:Mediawiki default / refer to actor table.
+revactor_timestamp  = timestamp         # type:binary
+revactor_page       = page_latest       # type:int
 
 # execute page data form
 data_page = (page_namespace,
@@ -222,15 +248,103 @@ sql_content = """INSERT INTO `content` (
         %s
     )"""
 
+# execute slots data form
+data_slots = (slot_revision_id,
+        slot_role_id,
+        slot_content_id,
+        slot_origin)
+
+print("Datas to insert into slots: ", data_slots)
+
+sql_slots = """INSERT INTO `slots` (
+        slot_revision_id,
+        slot_role_id,
+        slot_content_id,
+        slot_origin)
+    VALUES (
+        %s,
+        %s,
+        %s,
+        %s
+    )"""
+
+# execute comment data form
+data_comment = (comment_hash, comment_text)
+
+print("Datas to insert into comment: ", data_comment)
+
+sql_comment = """INSERT INTO `comment` (
+        comment_hash,
+        comment_text)
+    VALUES (
+        %s,
+        %s
+    )"""
+
+# execute revision_comment_temp data form
+data_revision_comment_temp = (revcomment_rev, revcomment_comment_id)
+
+print("Datas to insert into revision_comment_temp: ", data_revision_comment_temp)
+
+sql_revision_comment_temp = """INSERT INTO `revision_comment_temp` (
+        revcomment_rev,
+        revcomment_comment_id)
+    VALUES (
+        %s,
+        %s
+    )"""
+
+# execute revision_actor_temp data form
+data_revision_actor_temp = (revactor_rev,
+        revactor_actor,
+        revactor_timestamp,
+        revactor_page)
+
+print("Datas to insert into revision_actor_temp: ", data_revision_actor_temp)
+
+sql_revision_actor_temp = """INSERT INTO `revision_actor_temp` (
+        revactor_rev,
+        revactor_actor,
+        revactor_timestamp,
+        revactor_page)
+    VALUES (
+        %s,
+        %s,
+        %s,
+        %s
+    )"""
+
 try:
     cursor.execute(sql_page, data_page)
     cursor.execute(sql_text, data_text)
     cursor.execute(sql_revision, data_revision)
     cursor.execute(sql_content, data_content)
+    cursor.execute(sql_slots, data_slots)
+    cursor.execute(sql_comment, data_comment)
+    cursor.execute(sql_revision_comment_temp, data_revision_comment_temp)
+    cursor.execute(sql_revision_actor_temp, data_revision_actor_temp)
     print("[+] INSERT QUERY OK")
     db.commit()
-except:
+except Exception as e:
     print("[+] Error: unable to insert data")
+    print(e)
     db.rollback()
 
 db.close()
+
+# Refresh current page (Purge the cache)
+S = requests.Session()
+
+URL = "http://localhost/w/api.php"
+
+PARAMS = {
+    "action": "purge",
+    "titles": title,                    # To purge multiple pages: "titles": "TitleA | TitleB | ..."
+    "format": "json"
+}
+
+R = S.post(url=URL, params=PARAMS)      # http://localhost/w/api.php?action=purge&titles
+DATA = R.text
+
+print("[+] POST Response: ")
+print(DATA)

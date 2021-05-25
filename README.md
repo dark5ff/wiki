@@ -25,12 +25,12 @@ GRANT ALL PRIVILEGES ON wikidb.* TO 'wikiuser'@'localhost' WITH GRANT OPTION;
 ```
 
 ## 4. Configuration
-https://www.mediawiki.org/wiki/Manual:Config_script
+https://www.mediawiki.org/wiki/Manual:Config_script \
 Open your browser and go to:
 ```
 http://localhost/w/mw-config/index.php
 ```
 
-Follow instructions refer to this link:
-https://wnw1005.tistory.com/570
-https://wnw1005.tistory.com/571
+Follow instructions refer to this link: \
+https://wnw1005.tistory.com/570 \
+https://wnw1005.tistory.com/571 \

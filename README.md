@@ -2,7 +2,7 @@
 ## 1. Requirements
 https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Installation_requirements
 ```
-sudo apt-get install php php-apcu php-intl php-mbstring php-xml php-mysql mariadb-server apache2
+sudo apt-get install php php-apcu php-intl php-mbstring php-xml php-mysql mysql-server apache2
 ```
 
 ## 2. Install

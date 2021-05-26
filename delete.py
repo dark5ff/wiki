@@ -2,8 +2,8 @@ import pymysql
 
 ### MAIN start
 db = pymysql.connect(
-        user='wikiuser',
-        passwd='nowiz',
+        user='root',
+        passwd='intadd',
         host='localhost',
         db='wikidb',
         charset='utf8'
@@ -30,15 +30,15 @@ try:
     cursor.execute(sql)
     print("[+] DELETE QUERY OK")
 
-    sql = """ALTER TABLE `page` auto_increment=0;"""
+    sql = """ALTER TABLE `page` auto_increment=1;"""
     cursor.execute(sql)
-    sql = """ALTER TABLE `text` auto_increment=0;"""
+    sql = """ALTER TABLE `text` auto_increment=1;"""
     cursor.execute(sql)
-    sql = """ALTER TABLE `content` auto_increment=0;"""
+    sql = """ALTER TABLE `content` auto_increment=1;"""
     cursor.execute(sql)
-    sql = """ALTER TABLE `revision` auto_increment=0;"""
+    sql = """ALTER TABLE `revision` auto_increment=1;"""
     cursor.execute(sql)
-    sql = """ALTER TABLE `comment` auto_increment=0;"""
+    sql = """ALTER TABLE `comment` auto_increment=1;"""
     cursor.execute(sql)
     print("[+] ALTER TABLE QUERY OK")
 

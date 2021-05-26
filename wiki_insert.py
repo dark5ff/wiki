@@ -30,9 +30,9 @@ def base36encode(number, alphabet='0123456789abcdefghijklmnopqrstuvwxyz'):
 
 def connect_db():    
     db = pymysql.connect(
-             user='wikiuser', 
-             passwd='nowiz', 
-             host='localhost', 
+             user='root', 
+             passwd='intadd', 
+             host='127.0.0.1', 
              db='wikidb', 
              charset='utf8'
         )
@@ -409,6 +409,7 @@ def main():
     db = connect_db()
     cursor = db.cursor(pymysql.cursors.DictCursor)
     page_id = fetch_pageId(cursor)
+    print("AAAAB")
     dataset = init_values(page_id, title, text)     # dataset = [(tuple1), (tuple2) ... ]
     sqlset = init_sql()                             # sqlset = [(tuple1), (tuple2) ... ]
 
@@ -424,6 +425,9 @@ def main():
         #cursor.execute(sql_comment, data_comment)
         #cursor.execute(sql_revision_comment_temp, data_revision_comment_temp)
         #cursor.execute(sql_revision_actor_temp, data_revision_actor_temp)
+        result = cursor.fetchall()
+        print(result)
+ 
         print("[+] INSERT QUERY OK")
         db.commit()
         purgePage(title)

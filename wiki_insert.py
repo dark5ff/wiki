@@ -409,7 +409,6 @@ def main():
     db = connect_db()
     cursor = db.cursor(pymysql.cursors.DictCursor)
     page_id = fetch_pageId(cursor)
-    print("AAAAB")
     dataset = init_values(page_id, title, text)     # dataset = [(tuple1), (tuple2) ... ]
     sqlset = init_sql()                             # sqlset = [(tuple1), (tuple2) ... ]
 
